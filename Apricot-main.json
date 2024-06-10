@@ -1,0 +1,157 @@
+{
+    "name": "Main",
+    "items": [
+
+        {
+            "name": "Activity Overview",
+            "value": "count() by _path | sort -r",
+            "description": "Shows a list of all Zeek streams in the data set, with a count of associated records"
+          },
+          {
+            "name": "Unique DNS Queries",
+            "value": "_path==\"dns\" | count() by query | sort -r",
+            "description": "Shows all unique DNS queries in the data set with count"
+          },
+          {
+            "name": "Top Domains",
+            "value": "_path==\"dns\" | count() by domain:=join(split(query,\".\")[-2:],\".\") | sort -r",
+            "description": "Displays the domains appearing most frequently in DNS queries"
+          },
+          {
+            "name": "Windows Networking Activity",
+            "value": "grep(smb*,_path) OR _path==\"dce_rpc\"",
+            "description": "Filters and displays smb_files, smb_mapping and DCE_RPC activity"
+          },
+          {
+            "name": "HTTP Requests",
+            "value": "_path==\"http\" | cut id.orig_h, id.resp_h, id.resp_p, method, host, uri | uniq -c",
+            "description": "Displays a list of the count of unique HTTP requests including source and destination"
+          },
+          {
+            "name": "Unique Network Connections",
+            "value": "_path==\"conn\" | cut id.orig_h, id.resp_p, id.resp_h | sort | uniq",
+            "description": "Displays a table showing all unique source:port:destination connections pairings"
+          },
+          {
+            "name": "Connection Received Data",
+            "value": "_path==\"conn\" | put total_bytes := orig_bytes + resp_bytes | sort -r total_bytes | cut uid, id, orig_bytes, resp_bytes, total_bytes",
+            "description": "Shows the connections between hosts, sorted by data received"
+          },
+          {
+            "name": "File Activity",
+            "value": "filename!=null | cut _path, tx_hosts, rx_hosts, conn_uids, mime_type, filename, md5, sha1",
+            "description": "Displays a curated view of file data including md5 and sha1 for complete file transfers"
+          },
+          {
+            "name": "Identify File Downloads from External Sources",
+            "value": "_path==\"files\" AND tx_hosts!=rx_hosts | cut orig_fuid, orig_mime_type, orig_filename, orig_bytes, tx_hosts | sort -r orig_bytes",
+            "description": "Detects file downloads where the source and destination hosts are different"
+          },
+          {
+            "name": "HTTP Post Requests",
+            "value": "method==\"POST\" | cut ts, uid, id, method, uri, status_code",
+            "description": "Displays all HTTP Post requests including the URI and HTTP status code"
+          },
+          {
+            "name": "Show IP Subnets",
+            "value": "_path==\"conn\" | put classnet := network_of(id.resp_h) | cut classnet | count() by classnet | sort -r",
+            "description": "Enumerates the classful networks for all destination IP addresses including count of connections"
+          },
+          {
+            "name": "Top Talkers",
+            "value": "_path==\"conn\" | count() by id.orig_h | sort -r",
+            "description": "Shows the top IP addresses initiating the most connections"
+          },
+          {
+            "name": "Top Services by Port",
+            "value": "_path==\"conn\" | count() by id.resp_p | sort -r",
+            "description": "Displays the most commonly used destination ports"
+          },
+          {
+            "name": "Suspicious DNS Queries",
+            "value": "_path==\"dns\" | filter query =~ /.*[^a-zA-Z0-9\\.-].*/ | count() by query | sort -r",
+            "description": "Identifies DNS queries with suspicious characters"
+          },
+          {
+            "name": "Top HTTP User-Agents",
+            "value": "_path==\"http\" | count() by user_agent | sort -r",
+            "description": "Shows the most common User-Agent strings in HTTP requests"
+          },
+          {
+            "name": "Failed Connection Attempts",
+            "value": "_path==\"conn\" AND conn_state==\"S0\" | count() by id.orig_h, id.resp_h | sort -r",
+            "description": "Displays all failed connection attempts"
+          },
+          {
+            "name": "HTTP Requests by Status Code",
+            "value": "_path==\"http\" | count() by status_code | sort -r",
+            "description": "Shows the number of HTTP requests grouped by status code"
+          },
+          {
+            "name": "Large Data Transfers",
+            "value": "_path==\"conn\" | filter orig_bytes + resp_bytes > 10485760 | sort -r (orig_bytes + resp_bytes)",
+            "description": "Identifies network connections with data transfers greater than 10MB"
+          },
+          {
+            "name": "Top HTTP Methods",
+            "value": "_path==\"http\" | count() by method | sort -r",
+            "description": "Shows the most commonly used HTTP methods"
+          },
+          {
+            "name": "Unique TLS Connections",
+            "value": "_path==\"ssl\" | cut id.orig_h, id.resp_h, id.resp_p | uniq",
+            "description": "Displays all unique TLS connections"
+          },
+          {
+            "name": "DNS Queries by Response Code",
+            "value": "_path==\"dns\" | count() by rcode | sort -r",
+            "description": "Counts DNS queries grouped by response code"
+          },
+          {
+            "name": "Top Destination IPs",
+            "value": "_path==\"conn\" | count() by id.resp_h | sort -r",
+            "description": "Shows the IP addresses receiving the most connections"
+          },
+          {
+            "name": "Connections by Duration",
+            "value": "_path==\"conn\" | put duration := ts - orig_ts | sort -r duration | cut uid, id, duration",
+            "description": "Displays connections sorted by their duration"
+          },
+          {
+            "name": "Unusual Protocols",
+            "value": "_path==\"conn\" | count() by proto | sort -r | filter proto not in (\"tcp\", \"udp\", \"icmp\")",
+            "description": "Identifies network traffic using less common protocols"
+          },
+          {
+            "name": "TLS Certificates",
+            "value": "_path==\"ssl\" | cut id.orig_h, id.resp_h, id.resp_p, subject, issuer, valid_from, valid_until | uniq",
+            "description": "Shows details of TLS certificates observed in the network"
+          },
+          {
+            "name": "Outbound Traffic",
+            "value": "_path==\"conn\" | cut id.orig_h, id.resp_h | uniq | sort id.orig_h",
+            "description": "Lists unique outbound connections from internal hosts"
+          },
+          {
+            "name": "Uncommon HTTP Methods",
+            "value": "_path==\"http\" | count() by method | sort -r",
+            "description": "Shows less common HTTP methods used in HTTP requests"
+          },{
+            "name": "Database Connection Attempts",
+            "value": "_path==\"conn\" AND id.resp_p in (3306, 5432, 1433) | count() by id.orig_h, id.resp_p | sort -r",
+            "description": "Identifies attempts to connect to common database ports (MySQL, PostgreSQL, MSSQL)"
+          },
+          {
+            "name": "Unauthorized Port Scans",
+            "value": "_path==\"conn\" AND conn_state==\"S0\" | count() by id.orig_h | sort -r",
+            "description": "Detects hosts initiating port scans (SYN scans)"
+          },
+          {
+            "name": "HTTP Requests with Suspicious URI Patterns",
+            "value": "_path==\"http\" | filter uri =~ /.*(cmd|shell|phpmyadmin|admin|config).*/ | count() by uri | sort -r",
+            "description": "Identifies HTTP requests with suspicious URI patterns indicative of possible attacks"
+          }
+
+
+
+    ]}
