@@ -1,5 +1,5 @@
 {
-    "name": "Alerts",
+    "name": "Analysis",
     "items": [
         {
             "name": "Anomalous HTTP Response Codes",
