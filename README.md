@@ -1,4 +1,7 @@
 <h1 align="center">Apricot Queries</h1>
+
+
+
 Included in this repo are json files with some helpful queries for getting
 started and exploring Zeek, Suricata and Snort data analyzed data within the Zui app.
 To import these queries:
