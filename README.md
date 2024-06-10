@@ -73,7 +73,7 @@ We welcome contributions from the community to enhance and expand the query libr
 
 ## Support
 
-If you encounter any issues or have questions, please open an issue on the repository or contact us at support@example.com.
+If you encounter any issues or have questions, please open an issue on the repository or contact us at okwaratoto11@gmail.com.
 
 ## License
 
