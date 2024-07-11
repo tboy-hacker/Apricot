@@ -1,167 +1,103 @@
 {
-    "name": "Alerts",
-    "items": [
+  "name": "Apricot-alerts",
+  "items": [
+    {
+      "name": "Suricata | Snort Alerts Overview",
+      "value": "event_type==\"alert\" | count() by alert.signature | sort -r",
+      "description": "Displays a count of Suricata | Snort alerts grouped by signature"
+    },
 
-        {
-            "name": "Suricata Alerts Overview",
-            "value": "event_type==\"alert\" | count() by alert.signature | sort -r",
-            "description": "Displays a count of Suricata alerts grouped by signature"
-          },
-               {
-                "name": "Suricata Alerts by Severity and Category",
-                "value": "event_type==\"alert\" | count() by alert.severity,alert.category | sort count",
-                "description": "Shows all Suricata alert counts, grouped by category and severity"
-              },
-              {
-            "name": "Top Suricata Signatures",
-            "value": "event_type==\"alert\" | count() by alert.signature | sort -r",
-            "description": "Displays the most frequent Suricata alert signatures"
-          },
-              {
-                "name": "Suricata Alerts by Signature",
-                "value": "event_type==\"alert\" | count() by alert.signature | sort count",
-                "description": "Shows all Suricata alert counts, grouped by signature"
-              },
-              {
-                "name": "Suricata Alert Categories by Source and Destination",
-                "value": "event_type==\"alert\" | alerts := union(alert.category) by src_ip, dest_ip",
-                "description": "Shows a list of Suricata alert categories, grouped by unique source and destination IP addresses"
-              },
-              {
-                "name": "Suricata Alert Signatures by Source and Destination",
-                "value": "event_type==\"alert\" | alerts := union(alert.signature) by src_ip, dest_ip",
-                "description": "Shows a list of Suricata alert signatures, grouped by unique source and destination IP addresses"
-              },
-              {
-            "name": "Top Source Ports for Suricata Alerts",
-            "value": "event_type==\"alert\" | count() by src_port | sort -r",
-            "description": "Displays the top source ports for Suricata alerts"
-          },
-          {
-            "name": "Top Destination Ports for Suricata Alerts",
-            "value": "event_type==\"alert\" | count() by dest_port | sort -r",
-            "description": "Shows the top destination ports for Suricata alerts"
-          },
-              {
-                "name": "Suricata Alert Categories by Subnet",
-                "value": "event_type==\"alert\" | alerts := union(alert.category) by network_of(dest_ip)",
-                "description": "Shows a list of Suricata alert categories, grouped by CIDR network"
-              },
-              {
-            "name": "Suricata Alerts by Protocol",
-            "value": "event_type==\"alert\" | count() by proto | sort -r",
-            "description": "Shows a count of Suricata alerts grouped by protocol"
-          },
-          {
-            "name": "Suricata Alerts by Classification",
-            "value": "event_type==\"alert\" | count() by alert.category | sort -r",
-            "description": "Displays a count of Suricata alerts grouped by classification"
-          },
-          {
-            "name": "Suricata Alerts Timeline",
-            "value": "event_type==\"alert\" | count() by ts := floor(ts, 1h) | sort ts",
-            "description": "Shows a timeline of Suricata alerts with counts per hour"
-          },
-          {
-            "name": "Suricata Alerts by Priority",
-            "value": "event_type==\"alert\" | count() by alert.priority | sort -r",
-            "description": "Displays a count of Suricata alerts grouped by priority"
-          },
-          {
-            "name": "Suricata Alerts with Payload",
-            "value": "event_type==\"alert\" AND payload != null | cut ts, src_ip, dest_ip, proto, payload | sort -r ts",
-            "description": "Displays Suricata alerts that have payload data"
-          },
-          {
-            "name": "Suricata Alerts by Sensor",
-            "value": "event_type==\"alert\" | count() by sensor | sort -r",
-            "description": "Shows a count of Suricata alerts grouped by sensor"
-          },
-              {
-            "name": "Suricata Alerts by Network Segment",
-            "value": "event_type==\"alert\" | put segment := network_of(dest_ip) | count() by segment | sort -r",
-            "description": "Shows Suricata alerts grouped by network segment (based on destination IP)"
-          },
-              
-             {
-                      "name": "Snort Alerts Overview",
-                      "value": "event_type==\"alert\" | count() by alert.signature | sort -r",
-                      "description": "Displays a count of Snort alerts grouped by signature"
-                  },
-                  {
-                      "name": "Snort Alerts by Severity",
-                      "value": "event_type==\"alert\" | count() by alert.severity | sort -r",
-                      "description": "Shows a count of Snort alerts grouped by severity"
-                  },
-                  {
-                      "name": "Top Snort Signatures",
-                      "value": "event_type==\"alert\" | count() by alert.signature | sort -r",
-                      "description": "Displays the most frequent Snort alert signatures"
-                  },
-                  {
-                      "name": "Snort Alerts by Source IP",
-                      "value": "event_type==\"alert\" | count() by src_ip | sort -r",
-                      "description": "Shows a count of Snort alerts grouped by source IP"
-                  },
-                  {
-                      "name": "Snort Alerts by Destination IP",
-                      "value": "event_type==\"alert\" | count() by dest_ip | sort -r",
-                      "description": "Shows a count of Snort alerts grouped by destination IP"
-                  },
-                  {
-                      "name": "Snort Alerts by Source and Destination IP",
-                      "value": "event_type==\"alert\" | count() by src_ip, dest_ip | sort -r",
-                      "description": "Displays a count of Snort alerts grouped by source and destination IP pairs"
-                  },
-                  {
-                      "name": "Snort Alerts by Protocol",
-                      "value": "event_type==\"alert\" | count() by proto | sort -r",
-                      "description": "Shows a count of Snort alerts grouped by protocol"
-                  },
-                  {
-                      "name": "Top Source Ports for Snort Alerts",
-                      "value": "event_type==\"alert\" | count() by src_port | sort -r",
-                      "description": "Displays the top source ports for Snort alerts"
-                  },
-                  {
-                      "name": "Top Destination Ports for Snort Alerts",
-                      "value": "event_type==\"alert\" | count() by dest_port | sort -r",
-                      "description": "Shows the top destination ports for Snort alerts"
-                  },
-                  {
-                      "name": "Snort Alerts by Classification",
-                      "value": "event_type==\"alert\" | count() by alert.classification | sort -r",
-                      "description": "Displays a count of Snort alerts grouped by classification"
-                  },
-                  {
-                      "name": "Snort Alerts Timeline",
-                      "value": "event_type==\"alert\" | count() by ts := floor(ts, 1h) | sort ts",
-                      "description": "Shows a timeline of Snort alerts with counts per hour"
-                  },
-                  {
-                      "name": "Snort Alerts by Priority",
-                      "value": "event_type==\"alert\" | count() by alert.priority | sort -r",
-                      "description": "Displays a count of Snort alerts grouped by priority"
-                  },
-                  {
-                      "name": "Snort Alerts by Sensor",
-                      "value": "event_type==\"alert\" | count() by sensor | sort -r",
-                      "description": "Shows a count of Snort alerts grouped by sensor"
-                  },
-                  {
-                      "name": "Snort Alerts with Payload",
-                      "value": "event_type==\"alert\" AND payload != null | cut ts, src_ip, dest_ip, proto, payload | sort -r ts",
-                      "description": "Displays Snort alerts that have payload data"
-                  },
-                  {
-                      "name": "Snort Alerts by Network Segment",
-                      "value": "event_type==\"alert\" | put segment := network_of(dest_ip) | count() by segment | sort -r",
-                      "description": "Shows Snort alerts grouped by network segment (based on destination IP)"
-                  },
-                  {
-                    "name": "Web Application Firewall (WAF) Alerts",
-                    "value": "event_type==\"alert\" AND alert.category==\"WAF\" | count() by alert.signature | sort -r",
-                    "description": "Displays alerts generated by the Web Application Firewall"
-                  }
+    {
+      "name": "Suricata | Snort Alerts by Severity and Category",
+      "value": "event_type==\"alert\" | count() by alert.severity,alert.category | sort count",
+      "description": "Shows all Suricata | Snort alert counts, grouped by category and severity"
+    },
+    {
+      "name": "Top Suricata | Snort Signatures",
+      "value": "event_type==\"alert\" | count() by alert.signature | sort -r",
+      "description": "Displays the most frequent Suricata | Snort alert signatures"
+    },
+    {
+      "name": "Suricata | Snort Alerts by Signature",
+      "value": "event_type==\"alert\" | count() by alert.signature | sort count",
+      "description": "Shows all Suricata | Snort alert counts, grouped by signature"
+    },
+    {
+      "name": "Suricata | Snort Alert Categories by Source and Destination",
+      "value": "event_type==\"alert\" | alerts := union(alert.category) by src_ip, dest_ip",
+      "description": "Shows a list of Suricata | Snort alert categories, grouped by unique source and destination IP addresses"
+    },
+    {
+      "name": "Suricata | Snort Alert Signatures by Source and Destination",
+      "value": "event_type==\"alert\" | alerts := union(alert.signature) by src_ip, dest_ip",
+      "description": "Shows a list of Suricata | Snort alert signatures, grouped by unique source and destination IP addresses"
+    },
+    {
+      "name": "Top Source Ports for Suricata | Snort Alerts",
+      "value": "event_type==\"alert\" | count() by src_port | sort -r",
+      "description": "Displays the top source ports for Suricata | Snort alerts"
+    },
+    {
+      "name": "Top Destination Ports for Suricata | Snort Alerts",
+      "value": "event_type==\"alert\" | count() by dest_port | sort -r",
+      "description": "Shows the top destination ports for Suricata | Snort alerts"
+    },
+    {
+      "name": "Suricata | Snort Alert Categories by Subnet",
+      "value": "event_type==\"alert\" | alerts := union(alert.category) by network_of(dest_ip)",
+      "description": "Shows a list of Suricata | Snort alert categories, grouped by CIDR network"
+    },
+    {
+      "name": "Suricata | Snort Alerts by Protocol",
+      "value": "event_type==\"alert\" | count() by proto | sort -r",
+      "description": "Shows a count of Suricata | Snort alerts grouped by protocol"
+    },
 
-    ]}
+    {
+      "name": "Suricata | Snort Alerts by Classification",
+      "value": "event_type==\"alert\" | count() by alert.classification | sort -r",
+      "description": "Displays a count of Suricata | Snort alerts grouped by classification"
+    },
+    {
+      "name": "Suricata | Snort Alerts Timeline",
+      "value": "event_type==\"alert\" | count() by ts := floor(ts, 1h) | sort ts",
+      "description": "Shows a timeline of Suricata | Snort alerts with counts per hour"
+    },
+    {
+      "name": "SSuricata | Snort Alerts by Priority",
+      "value": "event_type==\"alert\" | count() by alert.priority | sort -r",
+      "description": "Displays a count of Suricata | Snort alerts grouped by priority"
+    },
+    {
+      "name": "Suricata | Snort Alerts with Payload",
+      "value": "event_type==\"alert\" AND payload != null | cut ts, src_ip, dest_ip, proto, payload | sort -r ts",
+      "description": "Displays Suricata | Snort alerts that have payload data"
+    },
+    {
+      "name": "Suricata | Snort Alerts by Sensor",
+      "value": "event_type==\"alert\" | count() by sensor | sort -r",
+      "description": "Shows a count of Suricata | Snort alerts grouped by sensor"
+    },
+    {
+      "name": "Suricata | Snort Alerts by Network Segment",
+      "value": "event_type==\"alert\" | put segment := network_of(dest_ip) | count() by segment | sort -r",
+      "description": "Shows Suricata | Snort alerts grouped by network segment (based on destination IP)"
+    },
+
+    {
+      "name": "Suricata | Snort Alerts by Source IP",
+      "value": "event_type==\"alert\" | count() by src_ip | sort -r",
+      "description": "Shows a count of Suricata | Snort alerts grouped by source IP"
+    },
+    {
+      "name": "Suricata | Snort Alerts by Destination IP",
+      "value": "event_type==\"alert\" | count() by dest_ip | sort -r",
+      "description": "Shows a count of Suricata | Snort alerts grouped by Destination IP"
+    },
+    {
+      "name": "Web Application Firewall (WAF) Alerts",
+      "value": "event_type==\"alert\" AND alert.category==\"WAF\" | count() by alert.signature | sort -r",
+      "description": "Displays alerts generated by the Web Application Firewall"
+    }
+  ]
+}
