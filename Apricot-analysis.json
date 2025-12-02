@@ -2,266 +2,259 @@
   "name": "Apricot-analysis",
   "items": [
     {
-      "name": "Anomalous HTTP Response Codes",
+      "name": "Anomalous HTTP Response Codes (>=400)",
       "value": "_path==\"http\" AND status_code >= 400 | count() by status_code | sort -r",
       "description": "Shows the count of HTTP response codes that indicate errors (400 and above)"
     },
-
     {
-      "name": "HTTP Traffic by Content Type",
+      "name": "HTTP Traffic by Content Type (MIME)",
       "value": "_path==\"http\" | count() by mime_type | sort -r",
       "description": "Displays HTTP traffic distribution by MIME content types"
     },
     {
-      "name": "HTTP Responses with Large Payloads",
-      "value": "_path==\"http\" AND resp_size > 10MB | count() by uri | sort -r",
+      "name": "HTTP Responses with Large Payloads (>10MB)",
+      "value": "_path==\"http\" | put resp_size_bytes := if(resp_size != null(), resp_size, 0) | filter resp_size_bytes > 10485760 | count() by uri | sort -r",
       "description": "Detects HTTP responses with large payloads"
     },
     {
-      "name": "Identify Outbound HTTP Traffic to Suspicious IP Addresses",
+      "name": "HTTP to Known Suspicious IPs",
       "value": "_path==\"http\" AND id.resp_h in (\"malicious_ip1\", \"malicious_ip2\", \"malicious_ip3\") | count() by id.resp_h | sort -r",
-      "description": "Detects outbound HTTP traffic to known malicious IP addresses"
+      "description": "Detects outbound HTTP traffic to known malicious IP addresses (replace placeholders with real IPs or feed)"
     },
     {
-      "name": "Identify HTTP Response Status Codes for Redirects",
-      "value": "_path==\"http\" AND status_code =~ /^3/ | count() by status_code | sort -r",
+      "name": "HTTP Redirect Response Codes (3xx)",
+      "value": "_path==\"http\" AND status_code >= 300 AND status_code < 400 | count() by status_code | sort -r",
       "description": "Detects HTTP responses with status codes indicating redirects"
     },
     {
-      "name": "Unusual Protocol Combinations",
+      "name": "Unusual Protocols Summary",
       "value": "_path==\"conn\" | count() by proto | sort -r | filter proto not in (\"tcp\", \"udp\", \"icmp\")",
-      "description": "Identifies unusual protocol combinations in network traffic"
+      "description": "Identifies unusual protocols in network traffic"
     },
     {
-      "name": "Identify Short-Lived Network Connections",
-      "value": "_path==\"conn\" | put connection_duration := ts - orig_ts | filter connection_duration < 60 | count() by id.orig_h, id.resp_h | sort -r",
-      "description": "Detects short-lived network connections lasting less than 1 minute"
+      "name": "Short-Lived Connections (<60s)",
+      "value": "_path==\"conn\" | filter duration != null() AND duration < 60 | count() by id.orig_h, id.resp_h | sort -r",
+      "description": "Detects short-lived network connections (less than 1 minute)"
     },
     {
-      "name": "Identify Long-Lived Network Connections",
-      "value": "_path==\"conn\" | put connection_duration := ts - orig_ts | filter connection_duration > 3600 | count() by id.orig_h, id.resp_h | sort -r",
-      "description": "Detects long-lived network connections lasting more than 1 hour"
+      "name": "Long-Lived Connections (>1h)",
+      "value": "_path==\"conn\" | filter duration != null() AND duration > 3600 | count() by id.orig_h, id.resp_h | sort -r",
+      "description": "Detects long-lived network connections (more than 1 hour)"
     },
-
     {
-      "name": "Top SMTP Senders",
+      "name": "Top SMTP Senders (by source IP)",
       "value": "_path==\"smtp\" | count() by id.orig_h | sort -r",
       "description": "Shows the IP addresses sending the most SMTP traffic"
     },
-    {
-      "name": "SMTP Traffic by Email Sender",
-      "value": "_path==\"smtp\" | count() by id.orig_h | sort -r",
-      "description": "Shows SMTP traffic distribution by email sender"
+     {
+      "name": "Top Talkers by Bytes Transferred",
+      "value": "_path==\"conn\" | put total_bytes := orig_bytes + resp_bytes | count() by id.orig_h | sort -r total_bytes",
+      "description": "Highlights hosts that transmit or receive the most data in the network"
     },
     {
-      "name": "Identify Outbound SMTP Traffic to Unusual Domains",
-      "value": "_path==\"smtp\" AND mailfrom==\"\" AND NOT (domain==\"gmail.com\" OR domain==\"yahoo.com\" OR domain==\"hotmail.com\") | count() by domain | sort -r",
-      "description": "Identifies outbound SMTP traffic to domains not commonly associated with personal email services"
-    },
-
-    {
-      "name": "Large Outbound Email Attachments",
-      "value": "_path==\"smtp\" AND attachment.size > 10MB | count() by id.orig_h | sort -r",
-      "description": "Identifies SMTP traffic with large outbound email attachments"
+      "name": "Long-Lived HTTP Connections",
+      "value": "_path==\"http\" | put duration := ts - orig_ts | filter duration > 3600 | count() by id.orig_h, id.resp_h | sort -r",
+      "description": "Detects persistent HTTP connections lasting more than 1 hour, possibly indicating data exfiltration"
     },
     {
-      "name": "SMTP Traffic Analysis",
+      "name": "High-Frequency DNS Queries",
+      "value": "_path==\"dns\" | count() by query | filter count > 100 | sort -r",
+      "description": "Detects domains with unusually high request rates, possibly indicating automated activity"
+    },
+    {
+      "name": "SMTP Traffic by Sender (mailfrom)",
+      "value": "_path==\"smtp\" | count() by mailfrom | sort -r",
+      "description": "Shows SMTP traffic distribution by sender address"
+    },
+    {
+      "name": "Outbound SMTP to Unusual Domains (suggest whitelist config)",
+      "value": "_path==\"smtp\" AND mailfrom != \"\" | put domain := re_replace(mailfrom, \".*@(.+)$\", \"$1\") | filter domain != null() AND NOT (domain in (\"gmail.com\", \"yahoo.com\", \"hotmail.com\")) | count() by domain | sort -r",
+      "description": "Identifies outbound SMTP senders using domains that are not common personal providers"
+    },
+    {
+      "name": "Large Outbound Email Attachments (>10MB)",
+      "value": "_path==\"smtp\" | put attach_size := if(attachment_size != null(), attachment_size, 0) | filter attach_size > 10485760 | count() by id.orig_h | sort -r",
+      "description": "Identifies SMTP messages with large outbound attachments (field names may vary)"
+    },
+    {
+      "name": "SMTP Commands Overview",
       "value": "_path==\"smtp\" | count() by command | sort -r",
-      "description": "Analyzes SMTP commands to understand SMTP traffic patterns"
+      "description": "Analyzes SMTP commands to understand email traffic patterns"
     },
     {
-      "name": "SMTP Traffic Analysis by Sender Domain",
-      "value": "_path==\"smtp\" | cut mailfrom | split(mailfrom,\"@\") | count() by split_result[1] | sort -r",
-      "description": "Analyzes SMTP traffic by sender domain to identify traffic sources"
+      "name": "SMTP by Sender Domain (parsed)",
+      "value": "_path==\"smtp\" AND mailfrom != \"\" | put domain := re_replace(mailfrom, \".*@(.+)$\", \"$1\") | count() by domain | sort -r",
+      "description": "Analyzes SMTP traffic by sender domain"
     },
     {
-      "name": "Identify SMB/CIFS Traffic Patterns",
-      "value": "_path==\"smb_files\" OR _path==\"smb_mapping\" | count() by command | sort -r",
-      "description": "Analyzes SMB/CIFS traffic patterns to identify common commands used in file sharing"
+      "name": "SMB/CIFS Activity (files & mapping)",
+      "value": "_path in (\"smb_files\", \"smb_mapping\") | count() by command | sort -r",
+      "description": "Analyzes SMB/CIFS traffic patterns to identify common file-sharing commands"
     },
     {
-      "name": "Potential DDoS Attack Detection",
+      "name": "Potential DDoS Targets (high connection count)",
       "value": "_path==\"conn\" | count() by id.resp_h | sort -r | filter count > 1000",
-      "description": "Identifies potential DDoS targets by looking for IPs with a high number of connections"
+      "description": "Identifies potential DDoS targets by looking for IPs with very high connection counts"
     },
     {
-      "name": "Unauthorized SSH Access Attempts",
-      "value": "_path==\"ssh\" AND auth_success==\"F\" | count() by id.orig_h | sort -r",
-      "description": "Displays failed SSH access attempts to identify potential brute force attacks"
+      "name": "Unauthorized SSH Access Attempts (failed auth)",
+      "value": "_path==\"ssh\" AND auth_success==false | count() by id.orig_h | sort -r",
+      "description": "Displays failed SSH access attempts to identify potential brute force activity"
     },
     {
-      "name": "Suspicious HTTP User-Agents",
-      "value": "_path==\"http\" | count() by user_agent | sort -r | filter user_agent =~ /.*(curl|wget|python|java|libwww|httpclient).*/",
-      "description": "Identifies HTTP User-Agents that are commonly used by automated tools and scripts"
+      "name": "Suspicious HTTP User-Agents (automation tools)",
+      "value": "_path==\"http\" | filter user_agent =~ /(curl|wget|python|java|libwww|httpclient)/i | count() by user_agent | sort -r",
+      "description": "Identifies User-Agents commonly used by automated tools"
     },
     {
-      "name": "Unusual User-Agent Strings in HTTP Requests",
-      "value": "_path==\"http\" | filter user_agent !in (\"Mozilla\", \"Chrome\", \"Firefox\", \"Safari\", \"Edge\") | count() by user_agent | sort -r",
+      "name": "Uncommon User-Agent Strings",
+      "value": "_path==\"http\" | filter user_agent != null() | filter not user_agent in (\"Mozilla\", \"Chrome\", \"Firefox\", \"Safari\", \"Edge\") | count() by user_agent | sort -r",
       "description": "Identifies uncommon or suspicious User-Agent strings in HTTP requests"
     },
     {
-      "name": "Identify Outbound Traffic Using Rare User-Agent Strings",
-      "value": "_path==\"http\" | count() by user_agent | sort -r",
-      "description": "Detects outbound HTTP traffic with uncommon User-Agent strings, which may indicate non-standard or malicious behavior"
+      "name": "DNS Tunneling Candidates (long queries)",
+      "value": "_path==\"dns\" | put qlen := if(length(query) != null(), length(query), 0) | filter qlen > 50 | count() by query | sort -r",
+      "description": "Detects unusually long DNS queries that might be DNS tunneling"
     },
     {
-      "name": "DNS Tunneling Detection",
-      "value": "_path==\"dns\" | filter query_length > 50 | count() by query | sort -r",
-      "description": "Detects potential DNS tunneling by looking for unusually long DNS queries"
+      "name": "DNS NXDOMAIN with Long Queries",
+      "value": "_path==\"dns\" AND rcode==\"NXDOMAIN\" | put qlen := if(length(query) != null(), length(query), 0) | filter qlen > 50 | count() by query | sort -r",
+      "description": "Identifies NXDOMAIN responses for long queries (possible tunneling)"
     },
     {
-      "name": "DNS Tunneling Detection (NXDOMAIN)",
-      "value": "_path==\"dns\" AND rcode==\"NXDOMAIN\" | count() by query | sort -r",
-      "description": "Identifies potential DNS tunneling through NXDOMAIN responses"
+      "name": "Rare DNS Queries (observed < 5 times)",
+      "value": "_path==\"dns\" | count() by query | filter count < 5 | sort -r",
+      "description": "Lists DNS queries observed less than 5 times"
     },
     {
-      "name": "DNS Queries for Newly Observed Domains",
-      "value": "_path==\"dns\" | cut query | uniq -c | filter count < 5",
-      "description": "Identifies DNS queries for domains that have been observed less than 5 times"
-    },
-    {
-      "name": "Identify Potential DNS Amplification Attacks",
+      "name": "Potential DNS Amplification (ANY qtype & large rlength)",
       "value": "_path==\"dns\" AND qtype==\"ANY\" AND rcode==\"NOERROR\" AND rlength > 512 | count() by id.orig_h | sort -r",
-      "description": "Detects potential DNS amplification attacks based on unusually large responses to ANY queries"
+      "description": "Detects large responses to ANY queries that may be used for amplification"
     },
     {
-      "name": "Identify Potential DNS Amplification Attacks",
-      "value": "_path==\"dns\" AND qtype==\"ANY\" AND rcode==\"NOERROR\" AND rlength > 512 | count() by id.orig_h | sort -r",
-      "description": "Detects potential DNS amplification attacks based on unusually large responses to ANY queries"
-    },
-    {
-      "name": "Identify Large DNS Responses",
+      "name": "Large DNS Responses",
       "value": "_path==\"dns\" AND rlength > 512 | count() by query | sort -r",
-      "description": "Detects DNS responses exceeding the typical limit of 512 bytes"
+      "description": "Detects DNS responses larger than 512 bytes"
     },
-
     {
-      "name": "Identify Outbound DNS Queries to Suspicious TLDs",
-      "value": "_path==\"dns\" AND query_root_domain in (\".tk\", \".xyz\", \".pw\", \".top\") | count() by query | sort -r",
-      "description": "Detects outbound DNS queries to suspicious top-level domains"
+      "name": "Outbound DNS to Suspicious TLDs",
+      "value": "_path==\"dns\" | put tld := re_replace(query, \".*\\.([^.]+)$\", \".$1\") | filter tld in (\".tk\", \".xyz\", \".pw\", \".top\") | count() by query | sort -r",
+      "description": "Detects outbound DNS queries that end with suspicious TLDs"
     },
-
     {
-      "name": "Insecure Protocols",
+      "name": "Insecure Protocol Usage",
       "value": "_path==\"conn\" AND proto in (\"ftp\", \"telnet\", \"http\") | count() by proto | sort -r",
-      "description": "Identifies the use of insecure protocols such as FTP, Telnet, and HTTP"
+      "description": "Identifies use of unencrypted/insecure protocols"
     },
     {
-      "name": "High-Risk IP Addresses",
-      "value": "_path==\"intel\" AND seen.where==\"remote\" | count() by seen.addr | sort -r",
-      "description": "Lists high-risk IP addresses detected by the threat intelligence framework"
+      "name": "High-Risk IPs from Intel (if available)",
+      "value": "_path==\"intel\" | count() by seen.addr | sort -r",
+      "description": "Lists IP addresses flagged by integrated threat intelligence (field availability depends on pipeline)"
     },
     {
-      "name": "Connections to Known Malicious IPs",
-      "value": "_path==\"conn\" AND intel.hit==\"T\" | cut id.orig_h, id.resp_h, service, proto | uniq",
-      "description": "Shows connections to IP addresses flagged by threat intelligence sources"
+      "name": "Connections to Known Malicious IPs (intel hit)",
+      "value": "_path==\"conn\" AND intel.hit==true | cut id.orig_h, id.resp_h, service, proto | count() by id.resp_h | sort -r",
+      "description": "Shows connections flagged by threat intelligence"
     },
     {
       "name": "Top Network Services",
       "value": "_path==\"conn\" | count() by service | sort -r",
-      "description": "Displays the most frequently used network services"
+      "description": "Displays the most frequently observed services"
     },
     {
-      "name": "Unusual DNS Query Patterns",
-      "value": "_path==\"dns\" | cut query | count() by query | sort -r | filter count < 5",
-      "description": "Identifies unusual DNS query patterns with low occurrence"
+      "name": "Unusual DNS Query Patterns (low-occurrence)",
+      "value": "_path==\"dns\" | count() by query | filter count < 5 | sort -r",
+      "description": "Identifies DNS queries with low frequency"
     },
-
     {
-      "name": "SSH Brute Force Attempts",
+      "name": "SSH Brute Force Attempts (>=3 auth failures)",
       "value": "_path==\"ssh\" AND auth_attempts >= 3 | count() by id.orig_h | sort -r",
-      "description": "Detects SSH brute force attempts with multiple authentication failures"
+      "description": "Detects likely SSH brute-force activity"
     },
     {
-      "name": "SSH Traffic Analysis",
+      "name": "SSH Traffic by Command",
       "value": "_path==\"ssh\" | count() by command | sort -r",
-      "description": "Analyzes SSH commands to understand SSH traffic patterns"
+      "description": "Overview of SSH commands if recorded"
     },
     {
-      "name": "Identify Outbound SSH Connections to Unusual Ports",
+      "name": "Outbound SSH to Non-Standard Ports",
       "value": "_path==\"ssh\" AND id.resp_p not in (22, 2222) | count() by id.resp_p | sort -r",
-      "description": "Detects outbound SSH connections to ports other than the standard SSH ports (22, 2222)"
-    },
-
-    {
-      "name": "SSL/TLS Certificate Expiry Analysis",
-      "value": "_path==\"ssl\" | cut id.resp_h, subject, issuer, valid_from, valid_until | sort valid_until",
-      "description": "Analyzes SSL/TLS certificate validity periods to identify potential expirations"
+      "description": "Detects SSH connections to non-standard ports"
     },
     {
-      "name": "Identify Unusual SSL/TLS Handshake Patterns",
-      "value": "_path==\"ssl\" | count() by version, cipher | sort -r",
-      "description": "Analyzes SSL/TLS handshake patterns to identify unusual combinations of protocol versions and cipher suites"
+      "name": "TLS Certificate Expiry Analysis",
+      "value": "_path==\"tls\" | cut id.resp_h, subject, issuer, valid_from, valid_until | sort valid_until",
+      "description": "Analyzes TLS certificate validity periods"
     },
     {
-      "name": "Identify SSL/TLS Handshakes with Self-Signed Certificates",
-      "value": "_path==\"ssl\" AND certificate_chain_fuids == \"-\" | count() by id.orig_h | sort -r",
-      "description": "Detects SSL/TLS handshakes using self-signed certificates"
+      "name": "TLS Handshake Patterns (version/cipher)",
+      "value": "_path==\"tls\" | count() by version, cipher | sort -r",
+      "description": "Counts combinations of TLS versions and ciphers"
     },
     {
-      "name": "FTP Activity Analysis",
+      "name": "Self-signed Certificates",
+      "value": "_path==\"tls\" AND certificate_chain_fuids == \"-\" | count() by id.orig_h | sort -r",
+      "description": "Detects TLS handshakes where the certificate chain indicates a possible self-signed cert"
+    },
+    {
+      "name": "FTP Activity Overview",
       "value": "_path==\"ftp\" | count() by command | sort -r",
-      "description": "Analyzes FTP commands to identify FTP activity patterns"
+      "description": "Analyzes FTP activity"
     },
     {
-      "name": "FTP Uploads with Suspicious File Extensions",
-      "value": "_path==\"ftp\" AND command==\"put\" | filter arg !in (\".txt\", \".pdf\", \".doc\", \".xls\") | count() by arg | sort -r",
-      "description": "Identifies FTP uploads with suspicious file extensions"
+      "name": "FTP Uploads with Suspicious Extensions",
+      "value": "_path==\"ftp\" AND command==\"put\" | filter arg != null() | filter not arg =~ /\\.(txt|pdf|doc|xls)$/i | count() by arg | sort -r",
+      "description": "Identifies FTP uploads with potentially suspicious file extensions"
     },
     {
-      "name": "FTP Login Attempts with Invalid Credentials",
+      "name": "FTP Invalid Login Attempts",
       "value": "_path==\"ftp\" AND reply_code==530 | count() by user | sort -r",
-      "description": "Identifies FTP login attempts with invalid credentials"
+      "description": "Detects failed FTP login attempts"
     },
     {
-      "name": "IRC Traffic Analysis",
+      "name": "IRC Activity Summary",
       "value": "_path==\"irc\" | count() by command | sort -r",
-      "description": "Analyzes IRC (Internet Relay Chat) traffic commands"
+      "description": "Overview of IRC commands"
     },
     {
-      "name": "VoIP Traffic Analysis",
+      "name": "SIP/VoIP Methods",
       "value": "_path==\"sip\" | count() by method | sort -r",
-      "description": "Analyzes Session Initiation Protocol (SIP) traffic methods in VoIP communication"
+      "description": "Summarizes SIP methods observed"
     },
-
     {
-      "name": "ICMP Echo (Ping) Requests Analysis",
+      "name": "ICMP Echo Requests (Ping)",
       "value": "_path==\"icmp\" AND icmp_type==8 | count() by id.orig_h | sort -r",
-      "description": "Identifies hosts generating ICMP echo (ping) requests"
+      "description": "Identifies hosts generating ICMP echo requests"
     },
     {
-      "name": "Identify Large ICMP Echo (Ping) Requests",
-      "value": "_path==\"icmp\" AND icmp_type==8 AND icmp_code==0 AND size > 1024 | count() by id.orig_h | sort -r",
-      "description": "Detects ICMP echo (ping) requests larger than 1 KB"
-    },
-
-    {
-      "name": "Unencrypted Traffic Analysis",
-      "value": "_path==\"conn\" AND NOT (proto==\"ssl\" OR proto==\"tls\") | count() by proto | sort -r",
-      "description": "Detects unencrypted network traffic by excluding SSL/TLS connections"
-    },
-
-    {
-      "name": "Identify SQL Injection Attempts in HTTP Requests",
-      "value": "_path==\"http\" AND uri =~ /.*(sql|xss|injection|select|union|exec).*/ | count() by id.orig_h | sort -r",
-      "description": "Detects HTTP requests containing common SQL injection keywords"
+      "name": "Large ICMP Echo (>1KB)",
+      "value": "_path==\"icmp\" AND icmp_type==8 AND size > 1024 | count() by id.orig_h | sort -r",
+      "description": "Detects large ICMP echo payloads"
     },
     {
-      "name": "Identify Outbound UDP Traffic to Unusual Ports",
+      "name": "Unencrypted Traffic (exclude TLS)",
+      "value": "_path==\"conn\" AND NOT (service==\"ssl\" OR service==\"tls\") | count() by proto | sort -r",
+      "description": "Detects unencrypted traffic"
+    },
+    {
+      "name": "SQL Injection Indicators in HTTP URIs",
+      "value": "_path==\"http\" | filter uri =~ /(select|union|insert|update|delete|exec|xss|injection)/i | count() by id.orig_h | sort -r",
+      "description": "Detects HTTP URIs that contain common SQL injection or XSS keywords"
+    },
+    {
+      "name": "Outbound UDP to Non-Standard Ports",
       "value": "_path==\"conn\" AND proto==\"udp\" AND id.orig_p not in (53, 123, 161) | count() by id.orig_p | sort -r",
-      "description": "Detects outbound UDP traffic to ports other than commonly used UDP ports (DNS, NTP, SNMP)"
+      "description": "Detects UDP traffic to less-common source ports"
     },
-
     {
-      "name": "Identify Outbound Traffic to High-Entropy Domains",
-      "value": "_path==\"conn\" AND entropy(id.resp_h) > 4 | count() by id.orig_h | sort -r",
-      "description": "Detects outbound network traffic to domains with high entropy, which may indicate domain generation algorithms (DGAs) or fast flux networks"
+      "name": "High-Entropy Destination Hostnames",
+      "value": "_path==\"conn\" | put h := id.resp_h | filter h != null() AND entropy(h) > 4 | count() by id.orig_h | sort -r",
+      "description": "Detects traffic to high-entropy hostnames (DGA candidates) — entropy() availability depends on pipeline"
     },
-
     {
-      "name": "Identify Outbound Traffic Using Long Domain Names",
-      "value": "_path==\"http\" AND length(host) > 30 | count() by id.orig_h | sort -r",
-      "description": "Detects outbound HTTP traffic to domains with unusually long names, which may indicate domain generation algorithms (DGAs) or obfuscation techniques"
+      "name": "Long Hostnames in HTTP Requests",
+      "value": "_path==\"http\" | put hostlen := if(host != null(), length(host), 0) | filter hostlen > 30 | count() by id.orig_h | sort -r",
+      "description": "Detects HTTP traffic to hosts with long domain names (possible DGA/obfuscation)"
     }
   ]
 }
