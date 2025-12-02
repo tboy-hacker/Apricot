@@ -1,87 +1,71 @@
-<h1 align="center">Apricot Queries</h1>
 
 
+# Apricot Query Pack
 
 ## Overview
 
-This repository contains a collection of JSON files with helpful queries for getting started and exploring Zeek, Suricata, and Snort data within the Zui app. These queries are designed to facilitate the analysis of network traffic and security events, helping users to quickly derive insights from their data.
+The Apricot Query Pack provides a curated collection of ready-to-use Zed/Zui queries designed for analyzing Zeek, Suricata, and general network telemetry. This pack streamlines the process of examining network activity, detecting anomalies, and extracting meaningful insights from structured security data.
 
 ## Features
 
-- **Predefined Queries**: A set of queries tailored for Zeek, Suricata, and Snort data.
-- **Easy Import**: Simple steps to import queries into Zui.
-- **Organized Folder Structure**: Queries are organized into a folder named `Apricot` for easy access.
+* Prebuilt query sets for Zeek and Suricata logs.
+* Standardized and optimized Zed queries.
+* Clean folder structure for use inside the Zui application.
+* Easy import process for rapid analysis.
 
 ## Getting Started
 
-To import these queries into Zui, follow these steps:
+### 1. Download the Repository
 
-1. **Download the Repo**
-    - Clone the repository to your local system using the following command:
-      ```bash
-      git clone https://github.com/yourusername/apricot-queries.git
-      ```
-    - Alternatively, you can download the ZIP file from the repository's main page and extract it.
+Clone the repository:
 
-2. **Open Zui**
-    - Launch the Zui app on your system.
+```bash
+git clone https://github.com/tboy-hacker/apricot-queries.git
+```
 
-3. **Import Queries**
-    - In Zui, click the **+** menu in the upper-left corner of the app window.
-    - Select **Import Queries...** from the dropdown menu.
-    - Navigate to the location where you downloaded the repo and select the JSON files using the file picker utility.
+Or download the ZIP from the repository and extract it locally.
 
-4. **Access the Queries**
-    - Once imported, the loaded queries will appear in the "QUERIES" tab of Zui's left sidebar.
-    - They will be organized into a new folder named `Apricot`.
+### 2. Import Into Zui
+
+1. Open the Zui application.
+2. Select **+** in the upper-left corner.
+3. Choose **Import Queries…**.
+4. Select the JSON files from the `Apricot` folder.
+
+After import, the queries will appear under the **Queries** panel in a folder named **Apricot**.
 
 ## Usage
 
-- **Zeek Queries**: Utilize the Zeek-specific queries to analyze network connections, HTTP traffic, DNS queries, SSL/TLS handshakes, file transfers, and more. Example queries include:
-  - Top talkers in the network.
-  - HTTP request and response analysis.
-  - DNS query distribution.
-  - SSL certificate analysis.
+The pack includes queries for:
 
-- **Suricata Queries**: Leverage Suricata queries for detailed insights into IDS/IPS alerts, network protocol anomalies, threat detection, and performance metrics. Example queries include:
-  - High-priority IDS alerts.
-  - Protocol distribution analysis.
-  - Suspicious activity detection.
-  - Network flow analysis.
+* Network connection analysis
+* DNS activity and domain intelligence
+* HTTP traffic inspection
+* TLS certificate and handshake review
+* File activity and transfer tracing
+* Suricata alert investigation
+* General anomaly and behavior detection
 
-- **Snort Queries**: Explore Snort data with queries designed to uncover intrusion attempts, suspicious activities, security events, and network behavior patterns. Example queries include:
-  - Top intrusion detection alerts.
-  - Anomalous traffic patterns.
-  - Source and destination IP analysis.
-  - Malware detection alerts.
-
-- **Additional Network Analysis Queries**: The repository also includes general network analysis queries that are not specific to any single tool. These can be used to gain a broader understanding of network behavior and security posture. Example queries include:
-  - Bandwidth usage over time.
-  - Unusual port activity.
-  - Top communication pairs.
-  - Network latency analysis.
-  - Geolocation of IP addresses.
+Each query is categorized to make navigation simple inside Zui.
 
 ## Contributing
 
-We welcome contributions from the community to enhance and expand the query library. To contribute:
+Contributions are welcome. To contribute:
 
 1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Make your changes and ensure they are well-documented.
-4. Submit a pull request with a detailed description of your changes.
+2. Create a feature branch.
+3. Add or update queries with proper documentation.
+4. Submit a pull request.
 
 ## Support
 
-If you encounter any issues or have questions, please open an issue on the repository or contact us at okwaratoto11@gmail.com.
+For issues or questions, open an issue in the repository or contact:
+**[okwaratoto11@gmail.com](mailto:okwaratoto11@gmail.com)**
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Acknowledgements
-
-We would like to thank the developers of Zeek, Suricata, Snort, and Zui for their incredible tools and contributions to the cybersecurity community.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
 
+If you want a more detailed version, a shorter one, or a version tailored specifically for Zeek-only or Suricata-only packs, I can refine it further.
